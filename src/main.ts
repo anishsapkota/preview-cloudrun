@@ -98,6 +98,9 @@ export async function run(): Promise<void> {
     manifest.updateImage(image);
     manifest.updatePreviewTraffic(revision, tag);
     manifest.updateRevisionName(revision);
+    manifest.updateEnvVars({
+      NEXT_AUTH_URL: `https://${tag}--ms-server-staging-c4f6qdpj7q-ew.a.run.app`,
+    });
 
     const updatedManifest = await gcloud.updateCloudRunService(manifest);
     if (updatedManifest) {

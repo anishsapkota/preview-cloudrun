@@ -128,6 +128,20 @@ export class ServiceManifest {
 
     this._object.spec.template.spec.containers[0].image = image;
   }
+
+  public updateEnvVars(env: { [key: string]: string }): void {
+    if (!this._object?.spec?.template?.spec?.containers) {
+      throw new Error("failed to get the .spec.template.spec.containers field");
+    }
+
+    const containers = this._object.spec.template.spec.containers;
+    for (let i = 0; i < containers.length; i++) {
+      if (!containers[i].env) containers[i].env = [];
+      containers[i].env = containers[i].env.map((e: any) => {
+        if (env[e.name]) e.value = env[e.name];
+      });
+    }
+  }
 }
 
 export interface TrafficTarget {
