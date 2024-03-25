@@ -72,10 +72,10 @@ export class ServiceManifest {
       .traffic as Array<TrafficTarget>;
     const next: Array<TrafficTarget> = [];
     for (let i = 0; i < traffic.length; i++) {
-      if (traffic[i].latestRevision && this.getRevisionName()) {
+      if (traffic[i].latestRevision) {
         next.push({
           percent: 100,
-          revisionName: this.getRevisionName(),
+          revisionName: traffic[i].revisionName,
         });
         continue;
       }
@@ -114,9 +114,9 @@ export class ServiceManifest {
   }
 
   public updateRevisionName(revision: string): void {
-    if (!this.getRevisionName()) {
+    /*if (!this.getRevisionName()) {
       throw new Error("failed to get the revision name");
-    }
+    }*/
 
     this._object.spec.template.metadata.name = revision;
   }
