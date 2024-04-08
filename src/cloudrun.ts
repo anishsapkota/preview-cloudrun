@@ -45,7 +45,7 @@ export class ServiceManifest {
   public getRevisionName(): string {
     return this._object?.status?.traffic
       ? this._object?.status?.traffic.find(
-          (t: TrafficTarget) => t.latestRevision
+          (t: TrafficTarget) => t.percent === 100
         )?.revisionName
       : "";
   }
