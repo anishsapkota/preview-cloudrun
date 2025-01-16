@@ -99,11 +99,10 @@ export async function run(): Promise<void> {
     manifest.updateImage(image);
     manifest.updatePreviewTraffic(revision, tag);
     manifest.updateRevisionName(revision);
-    manifest.updateEnvVars({
-      NEXTAUTH_URL: `https://${tag}---ms-server-staging-c4f6qdpj7q-ew.a.run.app`,
-    });
+
     const customEnvVars = parseEnvVars(envVars);
     manifest.updateEnvVars({
+      NEXTAUTH_URL: `https://${tag}---ms-server-staging-c4f6qdpj7q-ew.a.run.app`,
       ...customEnvVars,
     });
 
