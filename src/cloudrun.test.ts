@@ -177,4 +177,129 @@ status:
       },
     ]);
   });
+
+  it("should add and update environment variables", () => {
+    const data = `
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: helloworld
+spec:
+  template:
+    spec:
+      containers:
+      - name: app
+        image: gcr.io/cloudrun/hello:latest
+        env:
+        - name: EXISTING_VAR
+          value: "old_value"
+        - name: APP_ENV
+          value: "development"
+`;
+    const svm = parseServiceManifest(data);
+
+    // Add and update environment variables
+    svm.updateEnvVars({
+      EXISTING_VAR: "new_value",
+      APP_ENV: "production",
+      NEW_VAR: "new_value",
+    });
+
+    // Validate environment variables after the update
+    expect(svm.object?.spec?.template?.spec?.containers[0].env).to.deep.equal([
+      { name: "EXISTING_VAR", value: "new_value" }, // Updated
+      { name: "APP_ENV", value: "production" }, // Updated
+      { name: "NEW_VAR", value: "new_value" }, // Added
+    ]);
+  });
+
+  it("should initialize env array if not present", () => {
+    const data = `
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: helloworld
+spec:
+  template:
+    spec:
+      containers:
+      - name: app
+        image: gcr.io/cloudrun/hello:latest
+`;
+    const svm = parseServiceManifest(data);
+
+    // Add environment variables
+    svm.updateEnvVars({
+      APP_ENV: "production",
+      NEW_VAR: "new_value",
+    });
+
+    // Validate that the env array is initialized and variables are added
+    expect(svm.object?.spec?.template?.spec?.containers[0].env).to.deep.equal([
+      { name: "APP_ENV", value: "production" }, // Added
+      { name: "NEW_VAR", value: "new_value" }, // Added
+    ]);
+  });
+
+  it("should handle empty environment variables object", () => {
+    const data = `
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: helloworld
+spec:
+  template:
+    spec:
+      containers:
+      - name: app
+        image: gcr.io/cloudrun/hello:latest
+        env:
+        - name: EXISTING_VAR
+          value: "old_value"
+`;
+    const svm = parseServiceManifest(data);
+
+    // Update with an empty env object
+    svm.updateEnvVars({});
+
+    // Ensure no changes are made
+    expect(svm.object?.spec?.template?.spec?.containers[0].env).to.deep.equal([
+      { name: "EXISTING_VAR", value: "old_value" },
+    ]);
+  });
+
+  it("should preserve existing variables if not in the update", () => {
+    const data = `
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: helloworld
+spec:
+  template:
+    spec:
+      containers:
+      - name: app
+        image: gcr.io/cloudrun/hello:latest
+        env:
+        - name: EXISTING_VAR
+          value: "old_value"
+        - name: UNCHANGED_VAR
+          value: "unchanged_value"
+`;
+    const svm = parseServiceManifest(data);
+
+    // Add and update environment variables
+    svm.updateEnvVars({
+      EXISTING_VAR: "new_value",
+      NEW_VAR: "new_value",
+    });
+
+    // Ensure existing variables are updated and new ones are added,
+    // while others remain unchanged
+    expect(svm.object?.spec?.template?.spec?.containers[0].env).to.deep.equal([
+      { name: "EXISTING_VAR", value: "new_value" }, // Updated
+      { name: "UNCHANGED_VAR", value: "unchanged_value" }, // Unchanged
+      { name: "NEW_VAR", value: "new_value" }, // Added
+    ]);
+  });
 });

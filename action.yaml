@@ -61,6 +61,11 @@ inputs:
       The GITHUB_TOKEN secret used to send comment on pull request.
     required: true
 
+  env_vars:
+    description: |-
+      update or add env variables to the deployment
+    required: true
+
 branding:
   icon: chevrons-right
   color: blue
