@@ -39,6 +39,7 @@ export async function run(): Promise<void> {
     const region = getInput("region") || "us-central1";
     const service = getInput("service");
     const image = getInput("image");
+    const envVars = getInput("env_vars"); // This will be a JSON string of env vars
     const revision =
       getInput("revision") || generateRevisionName(service, image);
     const tag = getInput("tag") || generateTrafficTag();
@@ -98,8 +99,11 @@ export async function run(): Promise<void> {
     manifest.updateImage(image);
     manifest.updatePreviewTraffic(revision, tag);
     manifest.updateRevisionName(revision);
+
+    const customEnvVars = parseEnvVars(envVars);
     manifest.updateEnvVars({
       NEXTAUTH_URL: `https://${tag}---ms-server-staging-c4f6qdpj7q-ew.a.run.app`,
+      ...customEnvVars,
     });
 
     const updatedManifest = await gcloud.updateCloudRunService(manifest);
@@ -239,6 +243,19 @@ async function computeGcloudVersion(str: string): Promise<string> {
     return await getLatestGcloudSDKVersion();
   }
   return str;
+}
+
+function parseEnvVars(envVarsStr: string): Record<string, string> {
+  try {
+    if (!envVarsStr) return {};
+    const envVars = JSON.parse(envVarsStr);
+    if (typeof envVars !== "object" || envVars === null) {
+      throw new Error("env_vars must be a JSON object");
+    }
+    return envVars;
+  } catch (error) {
+    throw new Error(`Failed to parse env_vars: ${error.message}`);
+  }
 }
 
 run();
