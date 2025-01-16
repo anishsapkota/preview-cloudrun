@@ -99,10 +99,11 @@ export async function run(): Promise<void> {
     manifest.updateImage(image);
     manifest.updatePreviewTraffic(revision, tag);
     manifest.updateRevisionName(revision);
-
-    const customEnvVars = parseEnvVars(envVars);
     manifest.updateEnvVars({
       NEXTAUTH_URL: `https://${tag}---ms-server-staging-c4f6qdpj7q-ew.a.run.app`,
+    });
+    const customEnvVars = parseEnvVars(envVars);
+    manifest.updateEnvVars({
       ...customEnvVars,
     });
 
@@ -249,6 +250,7 @@ function parseEnvVars(envVarsStr: string): Record<string, string> {
   try {
     if (!envVarsStr) return {};
     const envVars = JSON.parse(envVarsStr);
+    console.log(envVars);
     if (typeof envVars !== "object" || envVars === null) {
       throw new Error("env_vars must be a JSON object");
     }
