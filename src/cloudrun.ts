@@ -139,9 +139,23 @@ export class ServiceManifest {
     const containers = this._object.spec.template.spec.containers;
     for (let i = 0; i < containers.length; i++) {
       if (!containers[i].env) containers[i].env = [];
+
+      const existingEnvNames = new Set(
+        containers[i].env.map((e: any) => e.name)
+      );
+
       containers[i].env.forEach((e: any) => {
-        if (env[e.name]) e.value = env[e.name];
+        if (env[e.name]) {
+          e.value = env[e.name];
+        }
       });
+
+      // Add new environment variables from `env` that are not already present
+      for (const [key, value] of Object.entries(env)) {
+        if (!existingEnvNames.has(key)) {
+          containers[i].env.push({ name: key, value });
+        }
+      }
     }
   }
 }
