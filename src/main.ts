@@ -250,7 +250,6 @@ function parseEnvVars(envVarsStr: string): Record<string, string> {
   try {
     if (!envVarsStr) return {};
     const envVars = JSON.parse(envVarsStr);
-    console.log(envVars);
     if (typeof envVars !== "object" || envVars === null) {
       throw new Error("env_vars must be a JSON object");
     }
